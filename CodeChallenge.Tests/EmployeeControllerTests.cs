@@ -1,4 +1,6 @@
 
+using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text;
@@ -131,6 +133,76 @@ namespace CodeCodeChallenge.Tests.Integration
 
             // Assert
             Assert.AreEqual(HttpStatusCode.NotFound, response.StatusCode);
+        }
+
+        [TestMethod]
+        public void NumberOfReports_Returns_Ok()
+        {
+            // Arrange
+            var employeeId = "16a596ae-edd3-4847-99fe-c4518e82c86f";
+
+            // Execute
+            var getRequestTask = _httpClient.GetAsync($"api/employee/{employeeId}/NumberOfReports");
+            var response = getRequestTask.Result;
+
+            // Assert
+            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+            var reportingStructure = response.DeserializeContent<ReportingStructure>();
+
+            Assert.IsNotNull(reportingStructure);
+            AssertEmployee(reportingStructure.Employee, "John", "Lennon");
+            Assert.AreEqual(4, reportingStructure.NumberOfReports);
+
+            var directReport1 = reportingStructure
+                .Employee
+                .DirectReports
+                .SingleOrDefault(d => d.EmployeeId == "b7839309-3348-463b-a7e3-5de1c168beb3");
+
+            Assert.IsNotNull(directReport1);
+            AssertEmployee(reportingStructure.Employee, "Paul", "McCartney");
+
+            var directReport2 = reportingStructure
+                .Employee
+                .DirectReports
+                .SingleOrDefault(d => d.EmployeeId == "03aa1462-ffa9-4978-901b-7c001562cf6f");
+
+            Assert.IsNotNull(directReport1);
+            AssertEmployee(reportingStructure.Employee, "Ringo", "Starr");
+
+            var directReport3 = directReport2
+                .DirectReports
+                .SingleOrDefault(d => d.EmployeeId == "62c1084e-6e34-4630-93fd-9153afb65309");
+
+            Assert.IsNotNull(directReport1);
+            AssertEmployee(reportingStructure.Employee, "Pete", "Best");
+
+            var directReport4 = directReport2
+                .DirectReports
+                .SingleOrDefault(d => d.EmployeeId == "c0c2293d-16bd-4603-8e08-638a9d18b22c");
+
+            Assert.IsNotNull(directReport1);
+            AssertEmployee(reportingStructure.Employee, "George", "Harrison");
+        }
+
+        [TestMethod]
+        public void NumberOfReports_Returns_NotFound()
+        {
+            // Arrange
+            var employeeId = "Invalid_Id";
+
+            // Execute
+            var getRequestTask = _httpClient.GetAsync($"api/employee/{employeeId}/NumberOfReports");
+            var response = getRequestTask.Result;
+
+            // Assert
+            Assert.AreEqual(HttpStatusCode.NotFound, response.StatusCode);
+        }
+
+        private static void AssertEmployee(Employee employeeUnderTest, 
+            string expectedFirstName, string expectedLastName)
+        {
+            Assert.AreEqual(expectedFirstName, employeeUnderTest.FirstName);
+            Assert.AreEqual(expectedLastName, employeeUnderTest.LastName);
         }
     }
 }
