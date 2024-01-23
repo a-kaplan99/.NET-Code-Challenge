@@ -242,6 +242,50 @@ namespace CodeCodeChallenge.Tests.Integration
             AssertCompensation(expectedCompensation, actualCompensation);
         }
 
+        [TestMethod]
+        public void UpdateCompensation_Returns_NotFound()
+        {
+            // Arrange
+            var compensation = CreateDefaultCompensation("Invalid_Id");
+            var requestContent = new JsonSerialization().ToJson(compensation);
+
+            // Execute
+            var putRequestTask = _httpClient.PutAsync($"api/employee/{compensation.Employee.EmployeeId}/compensation",
+               new StringContent(requestContent, Encoding.UTF8, "application/json"));
+            var putResponse = putRequestTask.Result;
+
+            // Assert
+            Assert.AreEqual(HttpStatusCode.NotFound, putResponse.StatusCode);
+        }
+
+        [TestMethod]
+        public void GetCompensation_Returns_NotFound()
+        {
+            // Arrange
+            var employeeId = "Invalid_Id";
+
+            // Execute
+            var requestTask = _httpClient.GetAsync($"api/employee/{employeeId}/compensation");
+            var response = requestTask.Result;
+
+            // Assert
+            Assert.AreEqual(HttpStatusCode.NotFound, response.StatusCode);
+        }
+
+        [TestMethod]
+        public void GetCompensation_Returns_NotFound_For_Existing_Employee()
+        {
+            // Arrange
+            var employeeId = "03aa1462-ffa9-4978-901b-7c001562cf6f";
+
+            // Execute
+            var requestTask = _httpClient.GetAsync($"api/employee/{employeeId}/compensation");
+            var response = requestTask.Result;
+
+            // Assert
+            Assert.AreEqual(HttpStatusCode.NotFound, response.StatusCode);
+        }
+
         // Helper Methods
 
         private static void AssertEmployee(string expectedFirstName, string expectedLastName,
@@ -251,12 +295,12 @@ namespace CodeCodeChallenge.Tests.Integration
             Assert.AreEqual(expectedLastName, actualEmployee.LastName);
         }
 
-        private static Compensation CreateDefaultCompensation()
+        private static Compensation CreateDefaultCompensation(String id = "03aa1462-ffa9-4978-901b-7c001562cf6f")
             => new()
             {
                 Employee = new Employee
                 {
-                    EmployeeId = "03aa1462-ffa9-4978-901b-7c001562cf6f"
+                    EmployeeId = id
                 },
                 Salary = Int16.MaxValue,
                 EffectiveDate = new DateOnly()
