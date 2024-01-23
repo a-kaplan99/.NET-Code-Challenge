@@ -259,6 +259,22 @@ namespace CodeCodeChallenge.Tests.Integration
         }
 
         [TestMethod]
+        public void UpdateCompensation_Returns_Invalid()
+        {
+            // Arrange
+            var compensation = CreateDefaultCompensation();
+            var requestContent = new JsonSerialization().ToJson(compensation);
+
+            // Execute
+            var putRequestTask = _httpClient.PutAsync($"api/employee/Invalid_Id/compensation",
+               new StringContent(requestContent, Encoding.UTF8, "application/json"));
+            var putResponse = putRequestTask.Result;
+
+            // Assert
+            Assert.AreEqual(HttpStatusCode.UnprocessableEntity, putResponse.StatusCode);
+        }
+
+        [TestMethod]
         public void GetCompensation_Returns_NotFound()
         {
             // Arrange
