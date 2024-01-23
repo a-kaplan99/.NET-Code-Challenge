@@ -204,20 +204,20 @@ namespace CodeCodeChallenge.Tests.Integration
         }
 
         [TestMethod]
-        public void UpdateCompensation_Returns_Ok()
+        public void CreateCompensation_Returns_Ok()
         {
             // Arrange
             var compensation = CreateDefaultCompensation();
             var requestContent = new JsonSerialization().ToJson(compensation);
 
             // Execute
-            var putRequestTask = _httpClient.PutAsync($"api/employee/{compensation.Employee.EmployeeId}/compensation",
+            var postRequestTask = _httpClient.PostAsync($"api/employee/{compensation.Employee.EmployeeId}/compensation",
                new StringContent(requestContent, Encoding.UTF8, "application/json"));
-            var putResponse = putRequestTask.Result;
+            var postResponse = postRequestTask.Result;
 
             // Assert
-            Assert.AreEqual(HttpStatusCode.OK, putResponse.StatusCode);
-            var newCompensation = putResponse.DeserializeContent<Compensation>();
+            Assert.AreEqual(HttpStatusCode.OK, postResponse.StatusCode);
+            var newCompensation = postResponse.DeserializeContent<Compensation>();
 
             AssertCompensation(compensation, newCompensation);
         }
@@ -243,35 +243,19 @@ namespace CodeCodeChallenge.Tests.Integration
         }
 
         [TestMethod]
-        public void UpdateCompensation_Returns_NotFound()
+        public void CreateCompensation_Returns_NotFound()
         {
             // Arrange
             var compensation = CreateDefaultCompensation("Invalid_Id");
             var requestContent = new JsonSerialization().ToJson(compensation);
 
             // Execute
-            var putRequestTask = _httpClient.PutAsync($"api/employee/{compensation.Employee.EmployeeId}/compensation",
+            var postRequestTask = _httpClient.PostAsync($"api/employee/{compensation.Employee.EmployeeId}/compensation",
                new StringContent(requestContent, Encoding.UTF8, "application/json"));
-            var putResponse = putRequestTask.Result;
+            var postResponse = postRequestTask.Result;
 
             // Assert
-            Assert.AreEqual(HttpStatusCode.NotFound, putResponse.StatusCode);
-        }
-
-        [TestMethod]
-        public void UpdateCompensation_Returns_Invalid()
-        {
-            // Arrange
-            var compensation = CreateDefaultCompensation();
-            var requestContent = new JsonSerialization().ToJson(compensation);
-
-            // Execute
-            var putRequestTask = _httpClient.PutAsync($"api/employee/Invalid_Id/compensation",
-               new StringContent(requestContent, Encoding.UTF8, "application/json"));
-            var putResponse = putRequestTask.Result;
-
-            // Assert
-            Assert.AreEqual(HttpStatusCode.UnprocessableEntity, putResponse.StatusCode);
+            Assert.AreEqual(HttpStatusCode.NotFound, postResponse.StatusCode);
         }
 
         [TestMethod]
