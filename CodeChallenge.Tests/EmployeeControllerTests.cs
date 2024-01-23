@@ -142,7 +142,7 @@ namespace CodeCodeChallenge.Tests.Integration
             var employeeId = "16a596ae-edd3-4847-99fe-c4518e82c86f";
 
             // Execute
-            var getRequestTask = _httpClient.GetAsync($"api/employee/{employeeId}/NumberOfReports");
+            var getRequestTask = _httpClient.GetAsync($"api/employee/{employeeId}/ReportingStructure");
             var response = getRequestTask.Result;
 
             // Assert
@@ -153,35 +153,39 @@ namespace CodeCodeChallenge.Tests.Integration
             AssertEmployee(reportingStructure.Employee, "John", "Lennon");
             Assert.AreEqual(4, reportingStructure.NumberOfReports);
 
+            // Paul reports to John
             var directReport1 = reportingStructure
                 .Employee
                 .DirectReports
                 .SingleOrDefault(d => d.EmployeeId == "b7839309-3348-463b-a7e3-5de1c168beb3");
 
             Assert.IsNotNull(directReport1);
-            AssertEmployee(reportingStructure.Employee, "Paul", "McCartney");
+            AssertEmployee(directReport1, "Paul", "McCartney");
 
+            // Ringo reports to John
             var directReport2 = reportingStructure
                 .Employee
                 .DirectReports
                 .SingleOrDefault(d => d.EmployeeId == "03aa1462-ffa9-4978-901b-7c001562cf6f");
 
             Assert.IsNotNull(directReport1);
-            AssertEmployee(reportingStructure.Employee, "Ringo", "Starr");
+            AssertEmployee(directReport2, "Ringo", "Starr");
 
+            // Pete reports to Ringo who reports to John
             var directReport3 = directReport2
                 .DirectReports
                 .SingleOrDefault(d => d.EmployeeId == "62c1084e-6e34-4630-93fd-9153afb65309");
 
             Assert.IsNotNull(directReport1);
-            AssertEmployee(reportingStructure.Employee, "Pete", "Best");
+            AssertEmployee(directReport3, "Pete", "Best");
 
+            // George reports to Ringo who reports to John
             var directReport4 = directReport2
                 .DirectReports
                 .SingleOrDefault(d => d.EmployeeId == "c0c2293d-16bd-4603-8e08-638a9d18b22c");
 
             Assert.IsNotNull(directReport1);
-            AssertEmployee(reportingStructure.Employee, "George", "Harrison");
+            AssertEmployee(directReport4, "George", "Harrison");
         }
 
         [TestMethod]

@@ -59,5 +59,36 @@ namespace CodeChallenge.Services
 
             return newEmployee;
         }
+
+        public ReportingStructure ReportingStructure(string id)
+        {
+            Employee employee = GetById(id);
+
+            if (employee == null)
+            {
+                return null;
+            }
+
+            var numberOfReports = LoadReportingStructureAndCalculateNumberOfReports(employee.EmployeeId, 0);
+            return new ReportingStructure
+            {
+                Employee = employee,
+                NumberOfReports = numberOfReports
+            };
+        }
+
+        // Recursively build reporting structure and calculate number of reports given an employee id
+        private int LoadReportingStructureAndCalculateNumberOfReports(String id, int numDirectReports)
+        {
+            var directReports = _employeeRepository.GetDirectReportsById(id);
+            if (directReports == null || !directReports.Any())
+            {
+                return 0;
+            }
+
+            return numDirectReports
+                + directReports.Count
+                + directReports.Sum(d => LoadReportingStructureAndCalculateNumberOfReports(d.EmployeeId, numDirectReports));
+        }
     }
 }
