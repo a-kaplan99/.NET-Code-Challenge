@@ -1,4 +1,5 @@
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -150,7 +151,7 @@ namespace CodeCodeChallenge.Tests.Integration
             var reportingStructure = response.DeserializeContent<ReportingStructure>();
 
             Assert.IsNotNull(reportingStructure);
-            AssertEmployee(reportingStructure.Employee, "John", "Lennon");
+            AssertEmployee("John", "Lennon", reportingStructure.Employee);
             Assert.AreEqual(4, reportingStructure.NumberOfReports);
 
             // Paul reports to John
@@ -160,7 +161,7 @@ namespace CodeCodeChallenge.Tests.Integration
                 .SingleOrDefault(d => d.EmployeeId == "b7839309-3348-463b-a7e3-5de1c168beb3");
 
             Assert.IsNotNull(directReport1);
-            AssertEmployee(directReport1, "Paul", "McCartney");
+            AssertEmployee("Paul", "McCartney", directReport1);
 
             // Ringo reports to John
             var directReport2 = reportingStructure
@@ -169,7 +170,7 @@ namespace CodeCodeChallenge.Tests.Integration
                 .SingleOrDefault(d => d.EmployeeId == "03aa1462-ffa9-4978-901b-7c001562cf6f");
 
             Assert.IsNotNull(directReport1);
-            AssertEmployee(directReport2, "Ringo", "Starr");
+            AssertEmployee("Ringo", "Starr", directReport2);
 
             // Pete reports to Ringo who reports to John
             var directReport3 = directReport2
@@ -177,7 +178,7 @@ namespace CodeCodeChallenge.Tests.Integration
                 .SingleOrDefault(d => d.EmployeeId == "62c1084e-6e34-4630-93fd-9153afb65309");
 
             Assert.IsNotNull(directReport1);
-            AssertEmployee(directReport3, "Pete", "Best");
+            AssertEmployee("Pete", "Best", directReport3);
 
             // George reports to Ringo who reports to John
             var directReport4 = directReport2
@@ -185,7 +186,7 @@ namespace CodeCodeChallenge.Tests.Integration
                 .SingleOrDefault(d => d.EmployeeId == "c0c2293d-16bd-4603-8e08-638a9d18b22c");
 
             Assert.IsNotNull(directReport1);
-            AssertEmployee(directReport4, "George", "Harrison");
+            AssertEmployee("George", "Harrison", directReport4);
         }
 
         [TestMethod]
@@ -202,11 +203,70 @@ namespace CodeCodeChallenge.Tests.Integration
             Assert.AreEqual(HttpStatusCode.NotFound, response.StatusCode);
         }
 
-        private static void AssertEmployee(Employee employeeUnderTest, 
-            string expectedFirstName, string expectedLastName)
+        [TestMethod]
+        public void UpdateCompensation_Returns_Ok()
         {
-            Assert.AreEqual(expectedFirstName, employeeUnderTest.FirstName);
-            Assert.AreEqual(expectedLastName, employeeUnderTest.LastName);
+            // Arrange
+            var compensation = CreateDefaultCompensation();
+            var requestContent = new JsonSerialization().ToJson(compensation);
+
+            // Execute
+            var putRequestTask = _httpClient.PutAsync($"api/employee/{compensation.Employee.EmployeeId}/compensation",
+               new StringContent(requestContent, Encoding.UTF8, "application/json"));
+            var putResponse = putRequestTask.Result;
+
+            // Assert
+            Assert.AreEqual(HttpStatusCode.OK, putResponse.StatusCode);
+            var newCompensation = putResponse.DeserializeContent<Compensation>();
+
+            AssertCompensation(compensation, newCompensation);
+        }
+
+        [TestMethod]
+        public void GetCompensationById_Returns_Ok()
+        {
+            // Arrange
+            var expectedCompensation = CreateDefaultCompensation();
+            var requestContent = new JsonSerialization().ToJson(expectedCompensation);
+            _httpClient.PutAsync($"api/employee/{expectedCompensation.Employee.EmployeeId}/compensation",
+               new StringContent(requestContent, Encoding.UTF8, "application/json"));
+
+            // Execute
+            var getRequestTask = _httpClient.GetAsync($"api/employee/{expectedCompensation.Employee.EmployeeId}/compensation");
+            var response = getRequestTask.Result;
+
+            // Assert
+            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+            var actualCompensation = response.DeserializeContent<Compensation>();
+            
+            AssertCompensation(expectedCompensation, actualCompensation);
+        }
+
+        // Helper Methods
+
+        private static void AssertEmployee(string expectedFirstName, string expectedLastName,
+            Employee actualEmployee)
+        {
+            Assert.AreEqual(expectedFirstName, actualEmployee.FirstName);
+            Assert.AreEqual(expectedLastName, actualEmployee.LastName);
+        }
+
+        private static Compensation CreateDefaultCompensation()
+            => new()
+            {
+                Employee = new Employee
+                {
+                    EmployeeId = "03aa1462-ffa9-4978-901b-7c001562cf6f"
+                },
+                Salary = Int16.MaxValue,
+                EffectiveDate = new DateOnly()
+            };
+
+        private static void AssertCompensation(Compensation expectedCompensation, Compensation actualCompensaton)
+        {
+            Assert.AreEqual(expectedCompensation.Employee.EmployeeId, actualCompensaton.Employee.EmployeeId);
+            Assert.AreEqual(expectedCompensation.Salary, actualCompensaton.Salary);
+            Assert.AreEqual(expectedCompensation.EffectiveDate, actualCompensaton.EffectiveDate);
         }
     }
 }
