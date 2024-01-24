@@ -41,5 +41,29 @@ namespace CodeChallenge.Repositories
         {
             return _employeeContext.Remove(employee).Entity;
         }
+
+        public List<Employee> GetDirectReportsById(String id)
+        {
+            return _employeeContext.Employees
+                .Include(e => e.DirectReports)
+                .SingleOrDefault(e => e.EmployeeId == id)
+                .DirectReports;
+        }
+
+        public Compensation Add(Employee employee, Compensation compensation)
+        {
+            compensation.CompensationId = Guid.NewGuid().ToString();
+
+            // Add compensation reference to Employee
+            employee.Compensation = compensation;
+            return compensation;
+        }
+
+        public Employee GetByIdWithCompensation(String id)
+        {
+            return _employeeContext.Employees
+                .Include(e => e.Compensation)
+                .SingleOrDefault(e => e.EmployeeId == id);
+        }
     }
 }
