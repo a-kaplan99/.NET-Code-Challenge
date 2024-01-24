@@ -137,7 +137,7 @@ namespace CodeCodeChallenge.Tests.Integration
         }
 
         [TestMethod]
-        public void NumberOfReports_Returns_Ok()
+        public void ReportingStructure_Returns_Ok()
         {
             // Arrange
             var employeeId = "16a596ae-edd3-4847-99fe-c4518e82c86f";
@@ -190,7 +190,7 @@ namespace CodeCodeChallenge.Tests.Integration
         }
 
         [TestMethod]
-        public void NumberOfReports_Returns_NotFound()
+        public void ReportingStructure_Returns_NotFound()
         {
             // Arrange
             var employeeId = "Invalid_Id";
