@@ -12,5 +12,7 @@ namespace CodeChallenge.Services
         Employee Create(Employee employee);
         Employee Replace(Employee originalEmployee, Employee newEmployee);
         ReportingStructure ReportingStructure(String id);
+        CompensationResponse Create(String employeeId, Compensation compensation);
+        CompensationResponse GetCompensationById(String id);
     }
 }

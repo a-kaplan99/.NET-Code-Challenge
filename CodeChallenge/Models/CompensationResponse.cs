@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace CodeChallenge.Models
 {
-    public class Compensation
+    public class CompensationResponse
     {
-        public String CompensationId { get; set; }
+        public Employee Employee { get; set; }
         public int Salary { get; set; }
         public String EffectiveDate { get; set; }
     }
