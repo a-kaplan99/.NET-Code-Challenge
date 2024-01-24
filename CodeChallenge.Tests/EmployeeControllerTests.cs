@@ -224,7 +224,7 @@ namespace CodeCodeChallenge.Tests.Integration
         }
 
         [TestMethod]
-        public void GetCompensationById_Returns_Ok()
+        public void GetCompensation_Returns_Ok()
         {
             // Arrange
             var employeeId = "03aa1462-ffa9-4978-901b-7c001562cf6f";
